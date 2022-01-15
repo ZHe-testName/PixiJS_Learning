@@ -17,12 +17,17 @@
     <!-- <script src="./libs/pixi.min.js.map"></script> -->
     <script src="./libs/pixi.min.js"></script>
     <script>
-        window.onload = function (){
-            const keys = {};
-            const keysDiv = document.querySelector('#keys');
+        let playerSheet = {};
+        let app;
+        let player;
 
+        const keys = {};
+        const keysDiv = document.querySelector('#keys');
+        const speed = 2;
+
+        window.onload = function (){
             //создаем стейдж приложения
-            const app = new PIXI.Application({
+            app = new PIXI.Application({
                 width: 800,
                 height: 600,
                 backgroundColor: 0xAAAAAA,
@@ -32,16 +37,18 @@
 
             //спрайты нужны для рендера изображений и тп.
             //так как работа идет через графический процессор
-            const player = PIXI.Sprite.from('./imgs/player.png');
+            // const player = PIXI.Sprite.from('./imgs/player.png');
 
-            //назначаем центр спрайта
-            player.anchor.set(0.5);
+            // //назначаем центр спрайта
+            // player.anchor.set(0.5);
 
-            //и его позицию на app
-            player.x = app.view.width / 2;
-            player.y = app.view.height / 2;
+            // //и его позицию на app
+            // player.x = app.view.width / 2;
+            // player.y = app.view.height / 2;
 
-            app.stage.addChild(player);
+            // app.stage.addChild(player);
+            app.loader.add('demon', './imgs/Demon.png');
+            app.loader.load(doneLoading);
 
             //включает интерактанасть с взаимодействием пользователя
             // app.stage.interactive = true;
@@ -61,14 +68,86 @@
             window.addEventListener('keydown', keyDown);
             window.addEventListener('keyup', keyUp);
 
-            //ЗА кулисами у нас происходит постоянный цикл
-            //который следит за собитиями и очередю
-            //можно передать туда функцию которая и будет постояно запускатся
-            app.ticker.add(gameLoop);
+            
             //down - 40
             //up - 38
             //left - 37
             //right - 39
+            function doneLoading (){
+                createPlayerSheet();
+
+                createPlayer();
+                //ЗА кулисами у нас происходит постоянный цикл
+                //который следит за собитиями и очередю
+                //можно передать туда функцию которая и будет постояно запускатся
+                app.ticker.add(gameLoop);
+            };
+
+            function createPlayer (){
+                player = new PIXI.AnimatedSprite(playerSheet.standToBottom);
+
+                player.anchor.set(0.5);
+                player.animationSpeed = 0.3;
+                player.loop = false;
+
+                player.x = app.view.width / 2;
+                player.y = app.view.height / 2;
+
+                app.stage.addChild(player);
+
+                player.play();
+            };
+
+            function createPlayerSheet (){
+                //тут мы по идее задаем ключевые кадры дла анимации
+                //спрайта с помощю зборной картинки
+                const sheet = PIXI.BaseTexture.from(app.loader.resources['demon'].url);
+
+                const w = 16;
+                const h = 16;
+
+                //определяем свойства отображения тановленого персонажа
+                playerSheet['standToTop'] = [
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(0, 0, w, h))
+                ];
+                playerSheet['standToRight'] = [
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(5 * w, 3 * h, w, h))
+                ];
+                playerSheet['standToBottom'] = [
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(0, 1 * h, w, h))
+                ];
+                playerSheet['standToLeft'] = [
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(5 * w, 2 * h, w, h))
+                ];
+
+                 //определяем свойства отображения предвижения персонажа по осям
+                 playerSheet['walkToTop'] = [
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(2 * w, 0, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(1 * w, 0, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(0, 0, w, h))
+                ];
+                playerSheet['walkToRight'] = [
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(0, 3 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(1 * w, 3 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(2 * w, 3 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(3 * w, 3 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(4 * w, 3 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(5 * w, 3 * h, w, h))
+                ];
+                playerSheet['walkToBottom'] = [
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(2 * w, 1 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(1 * w, 1 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(0, 1 * h, w, h))       
+                ];
+                playerSheet['walkToLeft'] = [
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(0, 2 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(1 * w, 2 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(2 * w, 2 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(3 * w, 2 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(4 * w, 2 * h, w, h)),
+                    new PIXI.Texture(sheet, new PIXI.Rectangle(5 * w, 2 * h, w, h))
+                ];
+            };
 
             //Используем цикл чтобы постоянно отслеживать собития
             //изменений объекта с ключами
@@ -77,22 +156,46 @@
                 keysDiv.innerHTML = JSON.stringify(keys);
                 //L
                 if (keys['37']){
-                    player.x -= 5;
+                    if (!player.playing){
+                        player.textures = playerSheet.walkToLeft;
+
+                        player.play();
+                    };
+
+                    player.x -= speed;
                 };
 
                 //T
                 if (keys['38']){
-                    player.y -= 5;
+                    if (!player.playing){
+                        player.textures = playerSheet.walkToTop;
+
+                        player.play();
+                    };
+
+                    player.y -= speed;
                 };
 
                 //R
                 if (keys['39']){
-                    player.x += 5;
+                    if (!player.playing){
+                        player.textures = playerSheet.walkToRight;
+
+                        player.play();
+                    };
+                    
+                    player.x += speed;
                 };
 
                 //D
                 if (keys['40']){
-                    player.y += 5;
+                    if (!player.playing){
+                        player.textures = playerSheet.walkToBottom;
+
+                        player.play();
+                    };
+
+                    player.y += speed;
                 };
             };
 
