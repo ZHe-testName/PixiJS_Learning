@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixiJS Learn</title>
+    <link rel="stylesheet" href="./styles/style.css">
+</head>
+<body>
+    <h1>PixiJS</h1>
+
+    <div id="keys">
+
+    </div>
+
+    <!-- <script src="./libs/pixi.min.js.map"></script> -->
+    <script src="./libs/pixi.min.js"></script>
+    <script>
+        window.onload = function (){
+            const keys = {};
+            const keysDiv = document.querySelector('#keys');
+
+            //создаем стейдж приложения
+            const app = new PIXI.Application({
+                width: 800,
+                height: 600,
+                backgroundColor: 0xAAAAAA,
+            });
+
+            document.body.appendChild(app.view);
+
+            //спрайты нужны для рендера изображений и тп.
+            //так как работа идет через графический процессор
+            const player = PIXI.Sprite.from('./imgs/player.png');
+
+            //назначаем центр спрайта
+            player.anchor.set(0.5);
+
+            //и его позицию на app
+            player.x = app.view.width / 2;
+            player.y = app.view.height / 2;
+
+            app.stage.addChild(player);
+
+            //включает интерактанасть с взаимодействием пользователя
+            // app.stage.interactive = true;
+            
+            // app.stage.on('pointermove', movePlayer);
+
+            // function movePlayer (e){
+            //     //тут находится обьект с кординатами текущего положения
+            //     //мыши при собитии pointermove
+            //     const pos = e.data.global;
+
+            //     player.x = pos.x;
+            //     player.y = pos.y; 
+            // };
+
+            //обработчики собитий нажатия клавиш
+            window.addEventListener('keydown', keyDown);
+            window.addEventListener('keyup', keyUp);
+
+            //ЗА кулисами у нас происходит постоянный цикл
+            //который следит за собитиями и очередю
+            //можно передать туда функцию которая и будет постояно запускатся
+            app.ticker.add(gameLoop);
+            //down - 40
+            //up - 38
+            //left - 37
+            //right - 39
+
+            //Используем цикл чтобы постоянно отслеживать собития
+            //изменений объекта с ключами
+            //и двигать блоком
+            function gameLoop (){
+                keysDiv.innerHTML = JSON.stringify(keys);
+                //L
+                if (keys['37']){
+                    player.x -= 5;
+                };
+
+                //T
+                if (keys['38']){
+                    player.y -= 5;
+                };
+
+                //R
+                if (keys['39']){
+                    player.x += 5;
+                };
+
+                //D
+                if (keys['40']){
+                    player.y += 5;
+                };
+            };
+
+            function keyDown (e){
+                keys[e.keyCode] = true;
+            };
+
+            function keyUp (e){
+                keys[e.keyCode] = false;
+            };
+
+            // function move (keyCode){
+            //     switch(keyCode){
+            //         case 37:
+            //             player.x -= 20;
+            //             break;
+            //         case 38:
+            //             player.y -= 20;
+            //             break;
+            //         case 39:
+            //             player.x += 20;
+            //             break;
+            //         case 40:
+            //             player.y += 20;
+            //             break;
+            //         default:
+            //             console.log('Wrong key code!');
+            //     };
+            // };
+        };
+    </script>
+</body>
+</html>
